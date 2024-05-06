@@ -191,6 +191,7 @@ def click(ev):
     check_value = document['check_value'].value
     print('check_value=' + repr(check_value))  # console.log()
     result_node = document["result"]
+    result_node.clear()
     t = Tip(check_value, tip_percent)
     for tip_type in (TIP_STYLE_EXACT, TIP_STYLE_PALINDROME_DOWN, TIP_STYLE_PALINDROME_UP):
         print('-----')
