@@ -2,6 +2,8 @@
 
 Tipping calculator in Python / Brython / Javascript
 
+https://clach04.github.io/brython_tip_calc/index.html
+
 Tested with:
   * [Brython-3.12.3](https://github.com/brython-dev/brython/)
   * Mozilla Firefox 113.0.2
