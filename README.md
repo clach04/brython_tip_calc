@@ -1,5 +1,10 @@
+# Brython Tip Calc
 
-Tested with Brython-3.12.3
+Tipping calculator in Python / Brython / Javascript
+
+Tested with:
+  * Brython-3.12.3
+  * Mozilla Firefox 113.0.2
 
 https://github.com/brython-dev/brython/releases/tag/3.12.3
 
