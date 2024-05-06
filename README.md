@@ -3,7 +3,7 @@
 Tipping calculator in Python / Brython / Javascript
 
 Tested with:
-  * Brython-3.12.3
+  * [Brython-3.12.3](https://github.com/brython-dev/brython/)
   * Mozilla Firefox 113.0.2
 
 https://github.com/brython-dev/brython/releases/tag/3.12.3
