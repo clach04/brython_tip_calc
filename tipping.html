@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<script src="./brython.js"></script>
+<script src="./brython_stdlib.js"></script>
+</head>
+
+<body onload="brython();">
+<script type="text/python">
+
+#!/usr/bin/env python
+# -*- coding: us-ascii -*-
+# vim:ts=4:sw=4:softtabstop=4:smarttab:expandtab
+#
+"""Tip options:
+
+   * Exact
+   * round up/down
+   * Palindrome (Mirror) up and down
+   * checksum (last digit) - NOT implemented
+
+See:
+
+http://www.punny.org/money/fight-thieving-restaurant-servers-with-checksum-tips/
+
+# See https://github.com/brython-dev/brython/issues/1765
+from browser import alert
+from browser import document
+#from browser.widgets.dialog import InfoDialog  # does not work unless brython_stdlib.js scripttag used;  ModuleNotFoundError: No module named 'browser.widgets' brython.js:10974:56
+
+"""
+
+#import sys
+import decimal
+
+# brython
+from browser import document
+
+def is_palindrome(n, decimal_digits=2, decimal_marker='.'):
+    n_str = str(n)
+    n = decimal.Decimal(n_str)
+    n = n.normalize()
+    format_str = '1.' + (decimal_digits * '0')
+    n = n.quantize(decimal.Decimal(format_str))
+    n_str = str(n)
+    n_str = n_str.replace(decimal_marker, '')
+    return n_str == n_str[::-1]
+
+
+def gen_palindrome(n, decimal_digits=2, decimal_marker='.', round_up=True):
+    """Generates closest palandrone number to n,
+    this may round down or up depending on parameter round_up.
+    """
+    n_str = str(n)
+    original_n = decimal.Decimal(n_str)
+    original_n = original_n.normalize()
+    format_str = '1.' + (decimal_digits * '0')
+    original_n = original_n.quantize(decimal.Decimal(format_str))
+    n_str = str(original_n)
+    n_str = n_str.replace(decimal_marker, '')
+
+    new_n = decimal.Decimal(0)
+    l = int(len(n_str) / 2)   # cast needed for Python 3 (rather than integer divide) so that older Python 2.x versions work
+    keep_front_digits = n_str[:-l]
+    while original_n > new_n:
+        new_last_digits = n_str[:l]
+        new_last_digits = new_last_digits[::-1]  # reverse
+        palindrome_str = keep_front_digits + new_last_digits
+        new_n = decimal.Decimal(palindrome_str) / pow(10, decimal_digits)
+        new_n = new_n.quantize(decimal.Decimal(format_str))
+        if round_up and original_n > new_n:
+            # round up
+            keep_front_digits_int = int(keep_front_digits)
+            keep_front_digits_int += 1
+            keep_front_digits = str(keep_front_digits_int)
+            n_str = keep_front_digits + (l * '_')
+        else:
+        # round DOWN
+            break
+    return new_n
+
+
+# Tip generation types
+
+TIP_STYLE_EXACT = 'exact'
+TIP_STYLE_ROUND_UP = 'round_up'  # FIXME math results on demos don't look correct
+TIP_STYLE_PALINDROME_UP = 'palindrome_up'
+TIP_STYLE_PALINDROME = TIP_STYLE_PALINDROME_UP
+TIP_STYLE_PALINDROME_DOWN = 'palindrome_down'  # FIXME math results on demos don't look correct
+
+class Tip(object):
+    def __init__(self, check=None, tip_percent=15):
+        self.check = decimal.Decimal(str(check))
+        self.tip_percent = tip_percent
+        self.update_tip()
+
+    def update_tip(self):
+        self.tip = self.check / 100 * self.tip_percent
+        self.total = self.check + self.tip
+
+    def generate(self, tip_type=TIP_STYLE_EXACT):
+        if tip_type == TIP_STYLE_EXACT:
+            return self.total
+        elif tip_type == TIP_STYLE_ROUND_UP:
+            return self.total.quantize(decimal.Decimal('1'))
+        elif tip_type.startswith('palindrome'):  # TODO this check is a little dirty (use an IN check instead)
+            if tip_type == TIP_STYLE_PALINDROME_DOWN:
+                # palindrome round down
+                return gen_palindrome(self.total, round_up=False)
+            else:
+                # 'palindrome' TIP_STYLE_PALINDROME_UP
+                # palindrome round up
+                return gen_palindrome(self.total)
+        # TODO check sum total
+
+    def details(self, final_total, description=None):
+        description = description or ''
+        if description:
+            description = ' (%s)' % description
+        result = []
+        result.append('check: %s' % self.check)
+        result.append('tip_percent: %s%%' % self.tip_percent)
+        result.append('base tip: %s' % self.tip)
+        result.append('exact total: %s' % self.total)
+        result.append('final_total%s: %s' % (description, final_total))
+        actual_tip = final_total - self.check
+        result.append('actual tip%s: %s' % (description, actual_tip))
+        actual_tip_percent = actual_tip * 100 / self.check
+        result.append('actual tip percent%s: %s%%' % (description, actual_tip_percent))
+        return '\n'.join(result)
+
+
+def stdout_demo(check=10.00):
+    # quick stdout demo for now
+    for tip_percent in (15, 18, 20):
+        check = decimal.Decimal(str(check))
+        tip = check / 100 * tip_percent
+        total = check + tip
+
+        print('check: %s' % check)
+        print('tip_percent: %s' % tip_percent)
+        print('base tip: %s' % tip)
+        print('exact total: %s' % total)
+        print('round up total: %s' % total.quantize(decimal.Decimal('1')))
+        palindrome_total = gen_palindrome(total)
+        print('palindrome total: %s' % palindrome_total)
+        actual_tip = palindrome_total - decimal.Decimal(str(check))
+        print('actual tip: %s' % actual_tip)
+        actual_tip_percent = actual_tip * 100 / decimal.Decimal(str(check))
+        print('actual tip%%: %s' % actual_tip_percent)
+        print('')
+        t = Tip(check, tip_percent)
+        for tip_type in (TIP_STYLE_EXACT, TIP_STYLE_ROUND_UP, TIP_STYLE_PALINDROME_DOWN, TIP_STYLE_PALINDROME_UP):
+            print('-----')
+            #print(tip_type)
+            x = t.generate(tip_type)
+            print(t.details(x, tip_type))
+        print('---------------')
+
+
+def repl():
+    tip_percent = 20
+    print(sys.platform, sys.version)
+
+    try:
+        get_input = raw_input  # Python 2
+    except NameError:
+        get_input = input  # Python 3
+
+    check_value = get_input('Enter your check amount: ')
+    while check_value:
+        t = Tip(check_value, tip_percent)
+        for tip_type in (TIP_STYLE_EXACT, TIP_STYLE_PALINDROME_UP):
+            print('-----')
+            #print(tip_type)
+            x = t.generate(tip_type)
+            print(t.details(x, tip_type))
+            print('')
+        check_value = get_input('Enter your check amount: ')
+
+
+def click(ev):
+    tip_percent = document['tip_percent'].value or 20
+    tip_percent = decimal.Decimal(tip_percent)
+    check_value = document['check_value'].value
+    print('check_value=' + repr(check_value))  # console.log()
+    t = Tip(check_value, tip_percent)
+    for tip_type in (TIP_STYLE_EXACT, TIP_STYLE_PALINDROME_DOWN, TIP_STYLE_PALINDROME_UP):
+        print('-----')
+        #print(tip_type)
+        x = t.generate(tip_type)
+        print(t.details(x, tip_type))
+
+
+# bind event 'click' on button to callback function
+document["echo"].bind("click", click)
+# TODO default focus to entry field
+# TODO bind enter to click.. or timeout auto-click
+</script>
+
+<!-- TODO default value in "form" -->
+Check amount <input id="check_value"></br>
+Percentage <input id="tip_percent"></br>
+<button id="echo">click !</button>
+</body>
+
+</html>
+
