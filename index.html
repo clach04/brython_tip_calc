@@ -36,6 +36,7 @@ import decimal
 
 # brython
 from browser import document
+from browser import html
 
 def is_palindrome(n, decimal_digits=2, decimal_marker='.'):
     n_str = str(n)
@@ -185,12 +186,15 @@ def click(ev):
     tip_percent = decimal.Decimal(tip_percent)
     check_value = document['check_value'].value
     print('check_value=' + repr(check_value))  # console.log()
+    result_node = document["result"]
     t = Tip(check_value, tip_percent)
     for tip_type in (TIP_STYLE_EXACT, TIP_STYLE_PALINDROME_DOWN, TIP_STYLE_PALINDROME_UP):
         print('-----')
+        result_node  <= html.PRE(html.CODE('-----'))
         #print(tip_type)
         x = t.generate(tip_type)
         print(t.details(x, tip_type))
+        result_node  <= html.CODE(t.details(x, tip_type).replace('\n', '</br>'))
 
 
 # bind event 'click' on button to callback function
@@ -204,7 +208,8 @@ Check amount <input id="check_value"></br>
 Percentage <input id="tip_percent"></br>
 <button id="echo">calculate</button></br>
 
-NOTE output goes to web browser console.
+<div id="result" class="zone">
+</div>
 
     <a href="https://github.com/clach04/brython_tip_calc/">
     Brython Tip Calc
