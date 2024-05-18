@@ -202,6 +202,14 @@ def click(ev):
         result_node  <= html.CODE(t.details(x, tip_type).replace('\n', '</br>'))
 
 
+def key_check(ev):
+    #trace = document["traceKey"]
+    #trace.text = f"type: {ev.type}, key: {ev.key}"
+    if ev.key == 'Enter':  # TODO see if there is a better compare than string compare
+        click(ev)
+    ev.stopPropagation()
+
+
 # bind event 'click' on button to callback function
 document["echo"].bind("click", click)
 
@@ -209,7 +217,9 @@ document["echo"].bind("click", click)
 check_value_field = document['check_value']
 check_value_field.focus()
 
-# TODO bind enter key press to click.. or timeout auto-click
+# bind enter key press to click.. or timeout auto-click
+check_value_field.bind("keyup", key_check)
+# TODO see if "input" event type can be used https://brython.info/static_doc/3.12/en/keyboard_events.html ?
 </script>
 
 <!-- TODO default value in "form" -->
