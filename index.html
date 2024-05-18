@@ -204,8 +204,12 @@ def click(ev):
 
 # bind event 'click' on button to callback function
 document["echo"].bind("click", click)
-# TODO default focus to entry field
-# TODO bind enter to click.. or timeout auto-click
+
+# default focus to entry field
+check_value_field = document['check_value']
+check_value_field.focus()
+
+# TODO bind enter key press to click.. or timeout auto-click
 </script>
 
 <!-- TODO default value in "form" -->
