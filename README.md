@@ -1,6 +1,6 @@
 # Brython Tip Calc
 
-Tipping calculator in Python / Brython / Javascript
+Palindromic tipping calculator in Python / Brython / Javascript
 
 https://clach04.github.io/brython_tip_calc/index.html
 
